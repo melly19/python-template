@@ -39,18 +39,45 @@ def divide(a: int, b: int) -> int:
 def base64_decoder_shape(base64_encoded_str: str) -> str:
     """Decode a base64 encoded string of an image and return the shape (rectangle, triangle, or circle)."""
     import base64
-    from PIL import Image
+    import cv2
+    import numpy as np
     import io
+    from PIL import Image
 
     # Decode the base64 string into image bytes
     decoded_bytes = base64.b64decode(base64_encoded_str)
-    image = Image.open(io.BytesIO(decoded_bytes))
+    image = Image.open(io.BytesIO(decoded_bytes)).convert("RGB")
 
-    # Analyze the image dimensions to determine the shape
-    width, height = image.size
-    if width == height:
-        return "circle"
-    elif width > height:
-        return "rectangle"
-    else:
-        return "triangle"
+    # Convert the PIL image to a NumPy array for OpenCV processing
+    image_np = np.array(image)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+    # Apply edge detection
+    edges = cv2.Canny(gray, 50, 150)
+
+    # Find contours in the image
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for contour in contours:
+        # Approximate the contour to a polygon
+        epsilon = 0.04 * cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, epsilon, True)
+
+        # Determine the shape based on the number of vertices
+        vertices = len(approx)
+        if vertices == 3:
+            return "triangle"
+        elif vertices == 4:
+            # Check if the shape is a square or rectangle
+            x, y, w, h = cv2.boundingRect(approx)
+            aspect_ratio = w / float(h)
+            if 0.95 <= aspect_ratio <= 1.05:
+                return "square"
+            else:
+                return "rectangle"
+        elif vertices > 4:
+            return "circle"
+
+    return "unknown"
