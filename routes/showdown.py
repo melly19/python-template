@@ -162,6 +162,9 @@ def move():
     # Get the decision
     final_action = decide_action()
 
+    # Log the action so we can watch it play out in the console/Render logs
+    print(f"Opponent: {opponent} | Rule: {rule} | Card: {my_card} | ToCall: {to_call} -> {final_action.get_json()}")
+
     return final_action
 
 
