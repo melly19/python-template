@@ -84,12 +84,28 @@ def _traverse(base_duration: float, obs_list, t0: float):
     return cur
 
 @kancheong_bp.route('/kan-cheong-delivery-driver', methods=['POST'])
-def solve(data: str) -> str:
-    obj = json.loads(data)
+def solve() -> str:
+    obj = request.get_json(force=True, silent=True)
+    if obj is None:
+        return jsonify({
+            "total_duration_sec": None,
+            "arrival_time": None,
+            "path": [],
+            "error": "Invalid JSON payload",
+        }), 400
 
-    start_coord = tuple(obj['start_coordinate'])
-    end_coord = tuple(obj['end_coordinate'])
-    start_time = _parse_time(obj['start_time'])
+    try:
+        start_coord = tuple(obj['start_coordinate'])
+        end_coord = tuple(obj['end_coordinate'])
+        start_time = _parse_time(obj['start_time'])
+    except (KeyError, TypeError, ValueError):
+        return jsonify({
+            "total_duration_sec": None,
+            "arrival_time": None,
+            "path": [],
+            "error": "Malformed request payload",
+        }), 400
+
     edges = obj.get('edges', [])
     obstructions = obj.get('obstructions', [])
 
@@ -120,14 +136,14 @@ def solve(data: str) -> str:
             adj.setdefault(b, adj.get(b, []))  # ensure node exists
 
     def unreachable():
-        return json.dumps({
+        return jsonify({
             "total_duration_sec": None,
             "arrival_time": None,
             "path": [],
         })
 
     if start_coord == end_coord:
-        return json.dumps({
+        return jsonify({
             "total_duration_sec": 0,
             "arrival_time": _format_time(start_time),
             "path": [],
@@ -176,7 +192,7 @@ def solve(data: str) -> str:
     else:
         total = round(total, 6)
 
-    return json.dumps({
+    return jsonify({
         "total_duration_sec": total,
         "arrival_time": _format_time(dist[end_coord]),
         "path": path,
