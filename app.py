@@ -1,5 +1,8 @@
 import logging
 
+# from starlette.applications import Starlette
+# from starlette.routing import Mount
+# from a2wsgi import WSGIMiddleware
 from routes import app
 from routes.api_gateway import api_gateway_bp
 from routes.toolbox1 import mcp
@@ -29,11 +32,19 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-mcp_app = mcp.http_app(path="/mcp")
+# mcp_app = mcp.http_app(path="/")
+# asgi_app = Starlette(
+#     routes=[
+#         Mount("/mcp", app=mcp_app),
+#         Mount("/", app=WSGIMiddleware(app)),
+#     ],
+#     lifespan=mcp_app.lifespan
+# )
 
-app.mount("/mcp", mcp_app)
 if __name__ == "__main__":
     import os
+    #import uvicorn
     logging.info("Starting application ...")
-    # port = int(os.environ.get("PORT", 8080))
-    # mcp.run(transport="http", host="0.0.0.0", port=port)
+    #uvicorn.run(asgi_app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    port = int(os.environ.get("PORT", 8080))
+    mcp.run(transport="http", host="0.0.0.0", port=port)
