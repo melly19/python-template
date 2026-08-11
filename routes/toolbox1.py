@@ -22,7 +22,7 @@ def add(a: int, b: int) -> int:
 
 @mcp.tool
 def subtract(a: int, b: int) -> int:
-    """Subtract two numbers."""
+    """Subtract b from a."""
     return a - b
 
 @mcp.tool
@@ -56,4 +56,4 @@ def base64_decoder_shape(base64_encoded_str: str) -> str:
         return "triangle"
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="http")
