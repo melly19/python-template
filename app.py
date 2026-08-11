@@ -1,8 +1,8 @@
 import logging
 
-# from starlette.applications import Starlette
-# from starlette.routing import Mount
-# from a2wsgi import WSGIMiddleware
+from a2wsgi import WSGIMiddleware
+from starlette.routing import Mount
+
 from routes import app
 from routes.api_gateway import api_gateway_bp
 from routes.toolbox1 import mcp
@@ -32,19 +32,18 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# mcp_app = mcp.http_app(path="/")
-# asgi_app = Starlette(
-#     routes=[
-#         Mount("/mcp", app=mcp_app),
-#         Mount("/", app=WSGIMiddleware(app)),
-#     ],
-#     lifespan=mcp_app.lifespan
-# )
+# Flask is WSGI, but mcp.http_app() is an ASGI (Starlette) app, so the ASGI app
+# has to be the outer one -- a WSGI app cannot host an ASGI app. FastMCP serves
+# the exact path /mcp; everything else falls through to Flask via a WSGI bridge.
+mcp_app = mcp.http_app(path="/mcp")
+mcp_app.router.routes.append(Mount("/", app=WSGIMiddleware(app)))
+
+# This is the entry point for gunicorn/uvicorn, not the Flask app.
+asgi_app = mcp_app
 
 if __name__ == "__main__":
     import os
-    #import uvicorn
+    import uvicorn
     logging.info("Starting application ...")
-    #uvicorn.run(asgi_app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
     port = int(os.environ.get("PORT", 8080))
-    mcp.run(transport="http", host="0.0.0.0", port=port)
+    uvicorn.run(asgi_app, host="0.0.0.0", port=port)
