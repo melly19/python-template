@@ -72,3 +72,4 @@ watchfiles==1.2.0
 websockets==17.0.1
 Werkzeug==3.1.8
 gunicorn
+python-dateutil==2.9.0
