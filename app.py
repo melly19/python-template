@@ -3,6 +3,8 @@ import socket
 
 from routes import app
 from routes.api_gateway import api_gateway_bp
+from routes.toolbox1 import mcp
+from routes.toolbox1 import toolbox1_bp
 from routes.showdown import showdown_bp
 from routes.ghost_chains import ghost_chains_bp
 
@@ -28,5 +30,6 @@ if __name__ == "__main__":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(('localhost', 8080))
     port = sock.getsockname()[1]
+    mcp.run(transport="http")
     sock.close()
     app.run(port=port)
