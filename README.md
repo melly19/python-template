@@ -31,4 +31,13 @@ To extend this template further, add more endpoints in the `routes` directory an
 
 Note the init.py file in each folder. This file makes python treat directories containing it to be loaded in a module
 
-Also note that when using render as cloud PAAS, you should be adding `gunicorn app:app` as the start command.
+Also note that when using render as cloud PAAS, you should be adding `gunicorn -k uvicorn.workers.UvicornWorker app:asgi_app` as the start command.
+
+## MCP server
+
+The FastMCP server in `routes/toolbox1.py` is served at `/mcp`. Because FastMCP is
+ASGI and Flask is WSGI, `app.py` exposes `asgi_app` as the real entrypoint: it routes
+`/mcp` to FastMCP and everything else to the Flask app. `app` is still the plain Flask
+app, so blueprints and `@app.route` are unchanged — but it must be served through
+`asgi_app` under an ASGI worker, since FastMCP's session manager only starts if the
+ASGI lifespan runs. Plain `gunicorn app:app` would serve the Flask routes but not `/mcp`.
