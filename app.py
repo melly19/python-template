@@ -4,10 +4,12 @@ import socket
 from routes import app
 from routes.api_gateway import api_gateway_bp
 from routes.showdown import showdown_bp
+from routes.ghost_chains import ghost_chains_bp
 
 logger = logging.getLogger(__name__)
 app.register_blueprint(api_gateway_bp)
 app.register_blueprint(showdown_bp)
+app.register_blueprint(ghost_chains_bp)
 
 @app.route('/', methods=['GET'])
 def default_route():
