@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 import base64
 import json
 
 from routes import app
 
-@app.route('/solve', methods=['POST'])
+api_gateway_bp = Blueprint('api_gateway', __name__)
+@api_gateway_bp.route('/solve', methods=['POST'])
 def solve():
     try:
         # 1. Parse JSON body

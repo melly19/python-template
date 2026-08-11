@@ -2,14 +2,14 @@ import logging
 import socket
 
 from routes import app
+from routes.api_gateway1 import api_gateway_bp
 
 logger = logging.getLogger(__name__)
-
+app.register_blueprint(api_gateway_bp)
 
 @app.route('/', methods=['GET'])
 def default_route():
     return 'Python Template'
-
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()
