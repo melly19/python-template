@@ -54,6 +54,3 @@ def base64_decoder_shape(base64_encoded_str: str) -> str:
         return "rectangle"
     else:
         return "triangle"
-
-if __name__ == "__main__":
-    mcp.run(transport="http")
