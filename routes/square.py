@@ -1,14 +1,14 @@
 import json
 import logging
 
-from flask import request
+from flask import request, Blueprint
 
 from routes import app
 
 logger = logging.getLogger(__name__)
+square_bp = Blueprint('square_bp', __name__)
 
-
-@app.route('/square', methods=['POST'])
+@square_bp.route('/square', methods=['POST'])
 def evaluate():
     data = request.get_json()
     logging.info("data sent for evaluation {}".format(data))
