@@ -2,7 +2,7 @@ import logging
 import socket
 
 from routes import app
-from routes.api_gateway1 import api_gateway_bp
+from routes.api_gateway import api_gateway_bp
 
 logger = logging.getLogger(__name__)
 app.register_blueprint(api_gateway_bp)
