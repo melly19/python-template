@@ -1,6 +1,7 @@
 import logging
 
 from a2wsgi import WSGIMiddleware
+from starlette.routing import Mount
 
 from routes import app
 from routes.api_gateway import api_gateway_bp
@@ -31,25 +32,14 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# FastMCP speaks ASGI and Flask speaks WSGI, so the two are joined the other way
-# round from a blueprint: an ASGI entrypoint hands /mcp to FastMCP and wraps the
-# Flask app for everything else. `mcp_app` already serves its own /mcp path, so
-# it is dispatched to unstripped and no redirect is involved.
+# Flask is WSGI, but mcp.http_app() is an ASGI (Starlette) app, so the ASGI app
+# has to be the outer one -- a WSGI app cannot host an ASGI app. FastMCP serves
+# the exact path /mcp; everything else falls through to Flask via a WSGI bridge.
 mcp_app = mcp.http_app(path="/mcp")
-flask_asgi_app = WSGIMiddleware(app)
+mcp_app.router.routes.append(Mount("/", app=WSGIMiddleware(app)))
 
-
-async def asgi_app(scope, receive, send):
-    if scope["type"] == "lifespan":
-        # FastMCP's session manager is started here; Flask needs no lifespan.
-        await mcp_app(scope, receive, send)
-        return
-    path = scope.get("path", "")
-    if path == "/mcp" or path.startswith("/mcp/"):
-        await mcp_app(scope, receive, send)
-        return
-    await flask_asgi_app(scope, receive, send)
-
+# This is the entry point for gunicorn/uvicorn, not the Flask app.
+asgi_app = mcp_app
 
 if __name__ == "__main__":
     import os
