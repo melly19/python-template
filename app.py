@@ -29,6 +29,9 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
+mcp_app = mcp.http_app(path="/mcp")
+
+app.mount("/mcp", mcp_app)
 if __name__ == "__main__":
     import os
     logging.info("Starting application ...")
