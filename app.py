@@ -2,10 +2,10 @@ import logging
 import socket
 
 from routes import app
-from routes.api_gateway import api_gateway_bp
+from routes.api_gateway_v2 import api_gateway_bp_v2
 
 logger = logging.getLogger(__name__)
-app.register_blueprint(api_gateway_bp)
+app.register_blueprint(api_gateway_bp_v2)
 
 @app.route('/', methods=['GET'])
 def default_route():
