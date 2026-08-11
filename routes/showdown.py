@@ -61,28 +61,33 @@ def move():
                 opponent = name
 
         # ==========================================
-        # RULE 1: LOW BALL (Inverted) - vs Nadia
+        # RULE 1: LOW BALL (Inverted)
         # ==========================================
         if rule == 'low_ball':
             if opponent == "Nadia":
                 if round_name == "pre_reveal":
-                    if to_call <= 2:  # No major raise yet, steal the pot
-                        if my_card <= 9: return do_raise(min_raise if min_raise else 5)
+                    if my_card <= 3:
+                        return do_raise(min_raise + 10 if min_raise else 20)  # Value raise early!
+                    if to_call <= 2:  # Steal
+                        if my_card <= 8: return do_raise(min_raise if min_raise else 5)
                         return do_call()
-                    else:  # She raised!
-                        # Adjusted: We now call small bets with 4 and 5
-                        if my_card <= 3: return do_call()
-                        if my_card <= 5 and to_call <= 5: return do_call()
+                    else:  # She raised
+                        if my_card <= 6 and to_call <= 10: return do_call()  # Don't auto-fold 6!
                         return do_fold()
 
                 elif round_name == "post_reveal":
                     if my_card == comm_card: return do_fold()  # Pairs are trash in low ball
-                    if to_call == 0:  # She checked, try to steal
-                        if my_card <= 8: return do_raise(min_raise if min_raise else 10)
+
+                    if my_card <= 3:
+                        # We have the nuts. Shove all-in to extract maximum value!
+                        return do_raise(max_raise)
+
+                    if to_call == 0:
+                        if my_card <= 7: return do_raise(min_raise if min_raise else 10)
                         return do_check()
-                    else:  # She bet
-                        if my_card <= 3: return do_call()
-                        if my_card <= 5 and to_call <= 15: return do_call()
+                    else:
+                        # Call reasonable bets with mid-cards like 4, 5, and 6
+                        if my_card <= 6 and to_call <= 20: return do_call()
                         return do_fold()
             else:
                 # Generic low ball logic (Fallback)
@@ -120,10 +125,12 @@ def move():
         # ==========================================
         else:
             if opponent == "Nadia":
-                # Nadia plays Standard. Steal her blinds!
+                # Nadia plays Standard.
                 if round_name == "pre_reveal":
+                    if my_card >= 12:
+                        return do_raise(min_raise + 10 if min_raise else 20)  # Value bet!
                     if to_call <= 2:
-                        if my_card >= 6: return do_raise(min_raise if min_raise else 5)
+                        if my_card >= 8: return do_raise(min_raise if min_raise else 5)  # Tighter bluff
                         return do_call()
                     else:
                         if my_card >= 11: return do_call()
@@ -131,15 +138,20 @@ def move():
 
                 elif round_name == "post_reveal":
                     if my_card == comm_card: return do_raise(max_raise)
+
+                    if my_card >= 12:
+                        # Maximum punishment for premium cards
+                        return do_raise(max_raise)
+
                     if to_call == 0:
-                        if my_card >= 7: return do_raise(min_raise if min_raise else 10)  # Bluff
+                        if my_card >= 8: return do_raise(min_raise if min_raise else 10)
                         return do_check()
                     else:
-                        if my_card >= 12: return do_call()
+                        if my_card >= 11 and to_call <= 20: return do_call()
                         return do_fold()
 
             else:
-                # Remy plays Pair Bounty. He's aggressive. Trap him.
+                # Remy plays Pair Bounty. Trap him.
                 if round_name == "pre_reveal":
                     if my_card >= 11:
                         if to_call <= 10: return do_raise(min_raise + 5 if min_raise else 15)
@@ -161,9 +173,6 @@ def move():
 
     # Get the decision
     final_action = decide_action()
-
-    # Log the action so we can watch it play out in the console/Render logs
-    print(f"Opponent: {opponent} | Rule: {rule} | Card: {my_card} | ToCall: {to_call} -> {final_action.get_json()}")
 
     return final_action
 
