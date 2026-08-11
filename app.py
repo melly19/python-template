@@ -11,6 +11,7 @@ from routes.showdown import showdown_bp
 from routes.square import square_bp
 from routes.api_gateway_v2 import api_gateway_bp_v2
 from routes.ghost_chains import ghost_chains_bp
+from routes.kancheong import kancheong_bp
 
 logger = logging.getLogger(__name__)
 app.register_blueprint(api_gateway_bp)
@@ -19,6 +20,7 @@ app.register_blueprint(toolbox1_bp)
 app.register_blueprint(api_gateway_bp_v2)
 app.register_blueprint(ghost_chains_bp)
 app.register_blueprint(square_bp)
+app.register_blueprint(kancheong_bp)
 
 @app.route('/', methods=['GET'])
 def default_route():

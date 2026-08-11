@@ -2,6 +2,10 @@ import json
 import heapq
 from datetime import datetime, timezone
 
+from flask import Flask, request, jsonify, Blueprint
+
+# 1. Define the blueprint
+kancheong_bp = Blueprint('kancheong', __name__)
 
 def _parse_time(s: str) -> float:
     """Parse an ISO-8601 timestamp into epoch seconds (UTC)."""
@@ -79,7 +83,7 @@ def _traverse(base_duration: float, obs_list, t0: float):
 
     return cur
 
-
+@kancheong_bp.route('/kan-cheong-delivery-driver', methods=['POST'])
 def solve(data: str) -> str:
     obj = json.loads(data)
 
@@ -180,36 +184,6 @@ def solve(data: str) -> str:
 
 
 if __name__ == "__main__":
-    import sys
-    data = """
-    {
-    "start_coordinate": [0, 0],
-    "end_coordinate": [3, 1],
-    "start_time": "2026-06-10T08:30:00Z",
-    "nodes": [[0, 0], [1, 0], [2, 0], [2, 1], [3, 1]],
-    "edges": [
-        { "edge_id": "edge_0", "node1": [0, 0], "node2": [1, 0], "base_duration_sec": 60 },
-        { "edge_id": "edge_1", "node1": [1, 0], "node2": [2, 0], "base_duration_sec": 60 },
-        { "edge_id": "edge_2", "node1": [2, 0], "node2": [2, 1], "base_duration_sec": 40 },
-        { "edge_id": "edge_3", "node1": [2, 1], "node2": [3, 1], "base_duration_sec": 50 },
-        { "edge_id": "edge_4", "node1": [1, 0], "node2": [2, 1], "base_duration_sec": 120 }
-    ],
-    "obstructions": [
-        {
-        "edge_id": "edge_1",
-        "edge": { "from": [1, 0], "to": [2, 0] },
-        "start_time": "2026-06-10T08:00:00Z",
-        "end_time": "2026-06-10T09:00:00Z",
-        "speed_factor": 0.5
-        },
-        {
-        "edge_id": "edge_2",
-        "edge": { "from": [2, 1], "to": [2, 0] },
-        "start_time": "2026-06-10T08:15:00Z",
-        "end_time": "2026-06-10T08:45:00Z",
-        "speed_factor": 0.0
-        }
-    ]
-    }
-    """
-    print(solve(data))
+    app = Flask(__name__)
+    app.register_blueprint(kancheong_bp)
+    app.run(port=5000)
