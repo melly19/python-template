@@ -10,10 +10,6 @@ mcp = FastMCP("toolbox1")
 
 toolbox1_bp = Blueprint('toolbox1', __name__)
 
-@toolbox1_bp.route('/mcp', methods=['POST'])
-def mcp_run():
-    return "MCP active"
-
 @mcp.tool
 def name() -> str:
     """Return the name of the toolbox."""
